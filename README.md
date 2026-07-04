@@ -9,6 +9,9 @@ A hotel discovery + booking demo web app (no payments) built with React + Vite +
 - Wishlist (saved hotels)
 - Demo sign-in / sign-up (local only)
 
+## Live Demo
+https://stay-bee-alpha.vercel.app/
+
 ## Local Development
 ```bash
 npm install
