@@ -1,6 +1,6 @@
 import { prisma } from '../lib/db.js'
 import { createSession, hashPassword, normalizeEmail, serializeUser } from '../lib/auth.js'
-import { methodNotAllowed, readJson, sendError, sendJson } from '../lib/http.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -44,6 +44,6 @@ export default async function handler(req, res) {
     return sendJson(res, 201, { user: serializeUser(user), token })
   } catch (error) {
     console.error('signup failed', error)
-    return sendError(res, 500, 'Unable to create your account right now.')
+    return sendException(res, error, 'Unable to create your account right now.')
   }
 }

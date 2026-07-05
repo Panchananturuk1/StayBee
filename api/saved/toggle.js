@@ -1,6 +1,6 @@
 import { prisma } from '../lib/db.js'
 import { getAuthenticatedUser } from '../lib/auth.js'
-import { methodNotAllowed, readJson, sendError, sendJson } from '../lib/http.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -42,6 +42,6 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { saved: true })
   } catch (error) {
     console.error('saved toggle failed', error)
-    return sendError(res, 500, 'Unable to update your saved stays right now.')
+    return sendException(res, error, 'Unable to update your saved stays right now.')
   }
 }

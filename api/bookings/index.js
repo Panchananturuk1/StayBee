@@ -1,6 +1,6 @@
 import { prisma } from '../lib/db.js'
 import { getAuthenticatedUser } from '../lib/auth.js'
-import { methodNotAllowed, readJson, sendError, sendJson } from '../lib/http.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../lib/http.js'
 
 function serializeBooking(booking) {
   return {
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { bookings: bookings.map(serializeBooking) })
     } catch (error) {
       console.error('booking list failed', error)
-      return sendError(res, 500, 'Unable to load your bookings right now.')
+      return sendException(res, error, 'Unable to load your bookings right now.')
     }
   }
 
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
       return sendJson(res, 201, { booking: serializeBooking(booking) })
     } catch (error) {
       console.error('booking create failed', error)
-      return sendError(res, 500, 'Unable to create your booking right now.')
+      return sendException(res, error, 'Unable to create your booking right now.')
     }
   }
 

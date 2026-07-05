@@ -1,5 +1,5 @@
 import { getAuthenticatedUser, serializeUser } from '../lib/auth.js'
-import { methodNotAllowed, sendError, sendJson } from '../lib/http.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -15,6 +15,6 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { user: serializeUser(auth.user) })
   } catch (error) {
     console.error('session lookup failed', error)
-    return sendError(res, 500, 'Unable to load your session right now.')
+    return sendException(res, error, 'Unable to load your session right now.')
   }
 }

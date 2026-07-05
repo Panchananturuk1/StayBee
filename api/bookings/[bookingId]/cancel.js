@@ -1,6 +1,6 @@
 import { prisma } from '../../lib/db.js'
 import { getAuthenticatedUser } from '../../lib/auth.js'
-import { methodNotAllowed, sendError, sendJson } from '../../lib/http.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../../lib/http.js'
 
 function serializeBooking(booking) {
   return {
@@ -54,6 +54,6 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { booking: serializeBooking(booking) })
   } catch (error) {
     console.error('booking cancel failed', error)
-    return sendError(res, 500, 'Unable to cancel this booking right now.')
+    return sendException(res, error, 'Unable to cancel this booking right now.')
   }
 }

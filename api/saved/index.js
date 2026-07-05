@@ -1,6 +1,6 @@
 import { prisma } from '../lib/db.js'
 import { getAuthenticatedUser } from '../lib/auth.js'
-import { methodNotAllowed, sendError, sendJson } from '../lib/http.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../lib/http.js'
 
 export default async function handler(req, res) {
   const auth = await getAuthenticatedUser(req)
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       })
     } catch (error) {
       console.error('saved list failed', error)
-      return sendError(res, 500, 'Unable to load your saved stays right now.')
+      return sendException(res, error, 'Unable to load your saved stays right now.')
     }
   }
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { hotelIds: [] })
     } catch (error) {
       console.error('saved clear failed', error)
-      return sendError(res, 500, 'Unable to clear your saved stays right now.')
+      return sendException(res, error, 'Unable to clear your saved stays right now.')
     }
   }
 
