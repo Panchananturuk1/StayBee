@@ -3,6 +3,7 @@ import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { formatCurrency } from '@/utils/format'
+import StaybeeImage from '@/components/StaybeeImage'
 
 export default function RoomCard({
   room,
@@ -15,7 +16,7 @@ export default function RoomCard({
     <Card className="overflow-hidden">
       <div className="grid gap-4 md:grid-cols-12 md:items-stretch">
         <div className="md:col-span-5">
-          <img
+          <StaybeeImage
             src={room.images[0]}
             alt={room.name}
             className="h-52 w-full object-cover md:h-full"

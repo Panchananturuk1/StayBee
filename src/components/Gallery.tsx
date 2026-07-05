@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import StaybeeImage from '@/components/StaybeeImage'
 import { cn } from '@/lib/utils'
 
 export default function Gallery({ images, alt }: { images: string[]; alt: string }) {
@@ -12,7 +13,12 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
     <div className="space-y-3">
       <div className="relative overflow-hidden rounded-3xl ring-1 ring-white/10">
         {active ? (
-          <img src={active} alt={alt} className="h-[360px] w-full object-cover md:h-[420px]" />
+          <StaybeeImage
+            src={active}
+            alt={alt}
+            className="h-[360px] w-full object-cover md:h-[420px]"
+            loading="lazy"
+          />
         ) : (
           <div className="h-[360px] w-full bg-white/5 md:h-[420px]" />
         )}
@@ -51,7 +57,7 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
               )}
               aria-label={`Select image ${i + 1}`}
             >
-              <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <StaybeeImage src={img} alt="" className="h-full w-full object-cover" loading="lazy" />
               <div
                 className={cn(
                   'absolute inset-0 transition',

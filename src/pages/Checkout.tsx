@@ -5,6 +5,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
+import StaybeeImage from '@/components/StaybeeImage'
 import { getHotelById } from '@/data/stays'
 import { useSearchStore } from '@/store/useSearchStore'
 import { useBookingStore } from '@/store/useBookingStore'
@@ -208,7 +209,12 @@ export default function Checkout() {
           </div>
 
           <div className="mt-5 overflow-hidden rounded-3xl ring-1 ring-white/10">
-            <img src={hotel.images[1] || hotel.images[0]} alt={hotel.name} className="h-48 w-full object-cover" />
+            <StaybeeImage
+              src={hotel.images[1] || hotel.images[0]}
+              alt={hotel.name}
+              className="h-48 w-full object-cover"
+              loading="lazy"
+            />
           </div>
 
           <div className="mt-5 space-y-3 text-sm text-white/60">

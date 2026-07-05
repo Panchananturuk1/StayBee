@@ -8,6 +8,7 @@ import { formatCurrency } from '@/utils/format'
 import Button from '@/components/ui/Button'
 import { useWishlistStore } from '@/store/useWishlistStore'
 import { cn } from '@/lib/utils'
+import StaybeeImage from '@/components/StaybeeImage'
 
 export default function HotelCard({ hotel }: { hotel: Hotel }) {
   const isSaved = useWishlistStore((s) => s.has(hotel.id))
@@ -17,7 +18,7 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
     <Card className="group overflow-hidden">
       <div className="relative">
         <Link to={`/hotels/${hotel.id}`} className="block">
-          <img
+          <StaybeeImage
             src={hotel.images[0]}
             alt={hotel.name}
             className="h-52 w-full object-cover transition duration-500 group-hover:scale-[1.03]"

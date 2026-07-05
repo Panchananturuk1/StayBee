@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import { hotels } from '@/data/stays'
 import { useBookingStore } from '@/store/useBookingStore'
 import { formatCompactDate, formatCurrency } from '@/utils/format'
+import StaybeeImage from '@/components/StaybeeImage'
 
 export default function Bookings() {
   const bookings = useBookingStore((s) => s.bookings)
@@ -50,7 +51,7 @@ export default function Bookings() {
               <Card key={b.id} className="overflow-hidden">
                 <div className="grid gap-4 md:grid-cols-12 md:items-stretch">
                   <div className="md:col-span-4">
-                    <img
+                    <StaybeeImage
                       src={hotel?.images[0]}
                       alt={hotel?.name || 'Hotel'}
                       className="h-48 w-full object-cover md:h-full"
