@@ -7,6 +7,7 @@ import Checkout from '@/pages/Checkout'
 import Bookings from '@/pages/Bookings'
 import Saved from '@/pages/Saved'
 import Auth from '@/pages/Auth'
+import Profile from '@/pages/Profile'
 import NotFound from '@/pages/NotFound'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/saved" element={<Saved />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Route>

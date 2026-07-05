@@ -4,6 +4,7 @@ import { Bookmark, CalendarCheck, Compass, LogIn, Moon, Sun } from 'lucide-react
 import { useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
+import ProfileMenu from '@/components/ProfileMenu'
 import { useSessionStore } from '@/store/useSessionStore'
 
 function NavItem({
@@ -67,14 +68,7 @@ export default function Header() {
           </Button>
 
           {user ? (
-            <div className="flex items-center gap-2">
-              <div className="hidden text-sm text-white/70 sm:block">
-                {user.fullName}
-              </div>
-              <Button variant="secondary" className="h-10 px-4" disabled={isLoading} onClick={() => void signOut()}>
-                Sign out
-              </Button>
-            </div>
+            <ProfileMenu user={user} isLoading={isLoading} onSignOut={signOut} />
           ) : (
             <Button
               variant="secondary"
