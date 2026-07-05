@@ -1,6 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { storageKeys } from '@/store/storage'
+import { ApiError, apiFetch, getSessionToken } from '@/lib/api'
 import type { Booking, BookingGuestInfo, DateRange } from '@/types/stay'
 
 type CreateBookingInput = {
@@ -14,41 +13,74 @@ type CreateBookingInput = {
 
 type BookingState = {
   bookings: Booking[]
-  createBooking: (input: CreateBookingInput) => Booking
-  cancelBooking: (bookingId: string) => void
-  clear: () => void
+  isLoading: boolean
+  hasLoaded: boolean
+  loadBookings: () => Promise<void>
+  createBooking: (input: CreateBookingInput) => Promise<{ ok: true; booking: Booking } | { ok: false; message: string }>
+  cancelBooking: (bookingId: string) => Promise<{ ok: true } | { ok: false; message: string }>
+  reset: () => void
 }
 
-function bookingId() {
-  return `b_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`
-}
+export const useBookingStore = create<BookingState>()((set, get) => ({
+  bookings: [],
+  isLoading: false,
+  hasLoaded: false,
+  loadBookings: async () => {
+    if (!getSessionToken()) {
+      set({ bookings: [], hasLoaded: true, isLoading: false })
+      return
+    }
 
-export const useBookingStore = create<BookingState>()(
-  persist(
-    (set, get) => ({
-      bookings: [],
-      createBooking: (input) => {
-        const newBooking: Booking = {
-          id: bookingId(),
-          hotelId: input.hotelId,
-          roomId: input.roomId,
-          dateRange: input.dateRange,
-          guests: input.guests,
-          guestInfo: input.guestInfo,
-          totalPrice: input.totalPrice,
-          status: 'confirmed',
-          createdAt: new Date().toISOString(),
-        }
-        set({ bookings: [newBooking, ...get().bookings] })
-        return newBooking
-      },
-      cancelBooking: (bookingId) =>
-        set({
-          bookings: get().bookings.map((b) => (b.id === bookingId ? { ...b, status: 'cancelled' } : b)),
-        }),
-      clear: () => set({ bookings: [] }),
-    }),
-    { name: storageKeys.bookings },
-  ),
-)
+    set({ isLoading: true })
 
+    try {
+      const data = await apiFetch<{ bookings: Booking[] }>('/api/bookings')
+      set({ bookings: data.bookings, isLoading: false, hasLoaded: true })
+    } catch {
+      set({ bookings: [], isLoading: false, hasLoaded: true })
+    }
+  },
+  createBooking: async (input) => {
+    set({ isLoading: true })
+
+    try {
+      const data = await apiFetch<{ booking: Booking }>('/api/bookings', {
+        method: 'POST',
+        body: input,
+      })
+
+      set({ bookings: [data.booking, ...get().bookings], isLoading: false, hasLoaded: true })
+      return { ok: true, booking: data.booking }
+    } catch (error) {
+      set({ isLoading: false })
+      return {
+        ok: false,
+        message: error instanceof ApiError ? error.message : 'Unable to create your booking right now.',
+      }
+    }
+  },
+  cancelBooking: async (bookingId) => {
+    set({ isLoading: true })
+
+    try {
+      const data = await apiFetch<{ booking: Booking }>(`/api/bookings/${bookingId}/cancel`, {
+        method: 'POST',
+      })
+
+      set({
+        bookings: get().bookings.map((booking) => (booking.id === bookingId ? data.booking : booking)),
+        isLoading: false,
+        hasLoaded: true,
+      })
+
+      return { ok: true }
+    } catch (error) {
+      set({ isLoading: false })
+      return {
+        ok: false,
+        message: error instanceof ApiError ? error.message : 'Unable to cancel this booking right now.',
+      }
+    }
+  },
+  reset: () => set({ bookings: [], isLoading: false, hasLoaded: false }),
+}))

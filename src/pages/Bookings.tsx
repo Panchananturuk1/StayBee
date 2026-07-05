@@ -1,27 +1,50 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { CalendarX2, ReceiptText } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import { hotels } from '@/data/stays'
 import { useBookingStore } from '@/store/useBookingStore'
+import { useSessionStore } from '@/store/useSessionStore'
 import { formatCompactDate, formatCurrency } from '@/utils/format'
 import StaybeeImage from '@/components/StaybeeImage'
 
 export default function Bookings() {
+  const navigate = useNavigate()
   const bookings = useBookingStore((s) => s.bookings)
+  const isLoading = useBookingStore((s) => s.isLoading)
   const cancelBooking = useBookingStore((s) => s.cancelBooking)
+  const user = useSessionStore((s) => s.user)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
 
   const hotelById = useMemo(() => new Map(hotels.map((h) => [h.id, h])), [])
+
+  if (!user) {
+    return (
+      <Card className="p-10">
+        <div className="flex items-start gap-4">
+          <ReceiptText className="h-6 w-6 text-honey" />
+          <div>
+            <div className="font-display text-2xl tracking-tight text-white">Sign in to view bookings</div>
+            <div className="mt-2 text-sm text-white/60">
+              Booking history now comes from the database and is linked to your account.
+            </div>
+            <div className="mt-6">
+              <Button onClick={() => navigate('/auth', { state: { redirectTo: '/bookings' } })}>Sign in</Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <div className="text-xs font-medium tracking-wide text-white/55">Account</div>
         <h1 className="mt-2 font-display text-3xl tracking-tight text-white">My bookings</h1>
-        <div className="mt-2 text-sm text-white/60">Bookings live in localStorage for this demo.</div>
+        <div className="mt-2 text-sm text-white/60">Bookings sync with your account in the database.</div>
       </div>
 
       {bookings.length === 0 ? (
@@ -29,9 +52,9 @@ export default function Bookings() {
           <div className="flex items-start gap-4">
             <ReceiptText className="h-6 w-6 text-honey" />
             <div>
-              <div className="font-display text-2xl tracking-tight text-white">No bookings yet</div>
+              <div className="font-display text-2xl tracking-tight text-white">{isLoading ? 'Loading bookings...' : 'No bookings yet'}</div>
               <div className="mt-2 text-sm text-white/60">
-                Pick a stay, select a room, and confirm — you’ll see it here.
+                {isLoading ? 'Fetching your latest bookings from the database.' : 'Pick a stay, select a room, and confirm — you’ll see it here.'}
               </div>
               <div className="mt-6">
                 <Link to="/search">
@@ -110,19 +133,23 @@ export default function Bookings() {
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => {
-                              cancelBooking(b.id)
+                            disabled={isLoading}
+                            onClick={async () => {
+                              const result = await cancelBooking(b.id)
+                              if (result.ok === false) {
+                                return
+                              }
                               setConfirmCancel(null)
                             }}
                           >
                             Confirm cancel
                           </Button>
-                          <Button variant="secondary" size="sm" onClick={() => setConfirmCancel(null)}>
+                          <Button variant="secondary" size="sm" disabled={isLoading} onClick={() => setConfirmCancel(null)}>
                             Keep booking
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="secondary" size="sm" onClick={() => setConfirmCancel(b.id)}>
+                        <Button variant="secondary" size="sm" disabled={isLoading} onClick={() => setConfirmCancel(b.id)}>
                           Cancel
                         </Button>
                       )}
@@ -137,4 +164,3 @@ export default function Bookings() {
     </div>
   )
 }
-

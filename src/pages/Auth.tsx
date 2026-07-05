@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { KeyRound, UserRound } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -8,12 +8,19 @@ import Chip from '@/components/ui/Chip'
 import { useSessionStore } from '@/store/useSessionStore'
 
 type Mode = 'signin' | 'signup'
+type AuthRedirectState = {
+  redirectTo?: string
+  redirectState?: unknown
+} | null
 
 export default function Auth() {
   const navigate = useNavigate()
+  const location = useLocation()
   const user = useSessionStore((s) => s.user)
+  const isLoading = useSessionStore((s) => s.isLoading)
   const signIn = useSessionStore((s) => s.signIn)
   const signUp = useSessionStore((s) => s.signUp)
+  const redirect = (location.state as AuthRedirectState) || null
 
   const [mode, setMode] = useState<Mode>('signin')
   const [fullName, setFullName] = useState('')
@@ -21,13 +28,22 @@ export default function Auth() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  const goAfterAuth = () => {
+    if (redirect?.redirectTo) {
+      navigate(redirect.redirectTo, redirect.redirectState ? { state: redirect.redirectState } : undefined)
+      return
+    }
+
+    navigate('/')
+  }
+
   if (user) {
     return (
       <Card className="p-10">
         <div className="font-display text-3xl tracking-tight text-white">You’re signed in.</div>
-        <div className="mt-2 text-sm text-white/60">This is a demo session stored locally.</div>
+        <div className="mt-2 text-sm text-white/60">Your account is now backed by the database.</div>
         <div className="mt-6">
-          <Button onClick={() => navigate('/')}>Go home</Button>
+          <Button onClick={goAfterAuth}>{redirect?.redirectTo ? 'Continue' : 'Go home'}</Button>
         </div>
       </Card>
     )
@@ -36,9 +52,9 @@ export default function Auth() {
   return (
     <div className="mx-auto max-w-xl">
       <Card className="p-8 md:p-10">
-        <div className="text-xs font-medium tracking-wide text-white/55">Demo auth</div>
+        <div className="text-xs font-medium tracking-wide text-white/55">Account</div>
         <div className="mt-2 font-display text-3xl tracking-tight text-white">Sign in to save bookings</div>
-        <div className="mt-2 text-sm text-white/60">No email verification. Password is for demo only.</div>
+        <div className="mt-2 text-sm text-white/60">Create an account or sign in to sync bookings and saved stays.</div>
 
         <div className="mt-6 flex items-center gap-2">
           <Chip selected={mode === 'signin'} onClick={() => setMode('signin')}>
@@ -71,31 +87,32 @@ export default function Auth() {
 
           <Button
             className="h-12"
-            onClick={() => {
+            disabled={isLoading}
+            onClick={async () => {
               setError(null)
               const res =
                 mode === 'signin'
-                  ? signIn(email, password)
-                  : signUp(fullName, email, password)
+                  ? await signIn(email, password)
+                  : await signUp(fullName, email, password)
               if (res.ok === false) {
                 setError(res.message)
                 return
               }
-              navigate('/')
+              goAfterAuth()
             }}
           >
             {mode === 'signin' ? (
               <>
-                <KeyRound className="h-4 w-4" /> Sign in
+                <KeyRound className="h-4 w-4" /> {isLoading ? 'Signing in...' : 'Sign in'}
               </>
             ) : (
               <>
-                <UserRound className="h-4 w-4" /> Create account
+                <UserRound className="h-4 w-4" /> {isLoading ? 'Creating account...' : 'Create account'}
               </>
             )}
           </Button>
 
-          <Button variant="secondary" className="h-11" onClick={() => navigate(-1)}>
+          <Button variant="secondary" className="h-11" disabled={isLoading} onClick={() => navigate(-1)}>
             Back
           </Button>
         </div>

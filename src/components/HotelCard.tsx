@@ -1,17 +1,21 @@
 import { Heart } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type { Hotel } from '@/types/stay'
 import Card from '@/components/ui/Card'
 import Rating from '@/components/Rating'
 import Badge from '@/components/ui/Badge'
 import { formatCurrency } from '@/utils/format'
 import Button from '@/components/ui/Button'
+import { useSessionStore } from '@/store/useSessionStore'
 import { useWishlistStore } from '@/store/useWishlistStore'
 import { cn } from '@/lib/utils'
 import StaybeeImage from '@/components/StaybeeImage'
 
 export default function HotelCard({ hotel }: { hotel: Hotel }) {
+  const navigate = useNavigate()
+  const user = useSessionStore((s) => s.user)
   const isSaved = useWishlistStore((s) => s.has(hotel.id))
+  const isSaving = useWishlistStore((s) => s.isLoading)
   const toggle = useWishlistStore((s) => s.toggle)
 
   return (
@@ -35,10 +39,16 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
         <div className="absolute right-4 top-4">
           <Button
             variant="secondary"
+            disabled={isSaving}
             className={cn('h-10 w-10 rounded-full p-0', isSaved ? 'ring-honey/25' : '')}
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault()
-              toggle(hotel.id)
+              if (!user) {
+                navigate('/auth', { state: { redirectTo: '/saved' } })
+                return
+              }
+
+              await toggle(hotel.id)
             }}
             aria-label={isSaved ? 'Remove from saved' : 'Save this hotel'}
           >
@@ -70,4 +80,3 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
     </Card>
   )
 }
-

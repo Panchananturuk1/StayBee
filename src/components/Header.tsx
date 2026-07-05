@@ -37,6 +37,8 @@ export default function Header() {
   const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const user = useSessionStore((s) => s.user)
+  const hasHydrated = useSessionStore((s) => s.hasHydrated)
+  const isLoading = useSessionStore((s) => s.isLoading)
   const signOut = useSessionStore((s) => s.signOut)
 
   return (
@@ -69,14 +71,19 @@ export default function Header() {
               <div className="hidden text-sm text-white/70 sm:block">
                 {user.fullName}
               </div>
-              <Button variant="secondary" className="h-10 px-4" onClick={signOut}>
+              <Button variant="secondary" className="h-10 px-4" disabled={isLoading} onClick={() => void signOut()}>
                 Sign out
               </Button>
             </div>
           ) : (
-            <Button variant="secondary" className="h-10 px-4" onClick={() => navigate('/auth')}>
+            <Button
+              variant="secondary"
+              className="h-10 px-4"
+              disabled={!hasHydrated || isLoading}
+              onClick={() => navigate('/auth')}
+            >
               <LogIn className="h-4 w-4" />
-              Sign in
+              {!hasHydrated ? 'Loading' : 'Sign in'}
             </Button>
           )}
         </div>

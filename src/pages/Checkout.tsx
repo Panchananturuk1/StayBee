@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CheckCircle2, Shield, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
@@ -9,6 +9,7 @@ import StaybeeImage from '@/components/StaybeeImage'
 import { getHotelById } from '@/data/stays'
 import { useSearchStore } from '@/store/useSearchStore'
 import { useBookingStore } from '@/store/useBookingStore'
+import { useSessionStore } from '@/store/useSessionStore'
 import { formatCompactDate, formatCurrency, nightsBetween } from '@/utils/format'
 
 type CheckoutState = { hotelId: string; roomId: string } | null
@@ -24,15 +25,24 @@ export default function Checkout() {
   const setBasics = useSearchStore((s) => s.setBasics)
 
   const createBooking = useBookingStore((s) => s.createBooking)
+  const bookingLoading = useBookingStore((s) => s.isLoading)
+  const user = useSessionStore((s) => s.user)
 
   const hotel = useMemo(() => (state ? getHotelById(state.hotelId) : undefined), [state])
   const room = useMemo(() => hotel?.rooms.find((r) => r.id === state?.roomId), [hotel, state?.roomId])
 
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
+  const [fullName, setFullName] = useState(user?.fullName || '')
+  const [email, setEmail] = useState(user?.email || '')
   const [phone, setPhone] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    setFullName((current) => current || user.fullName)
+    setEmail((current) => current || user.email)
+  }, [user])
 
   const nights = nightsBetween(checkIn, checkOut) || 1
   const total = room ? room.pricePerNight * nights : 0
@@ -65,6 +75,34 @@ export default function Checkout() {
     )
   }
 
+  if (!user) {
+    return (
+      <Card className="p-8">
+        <div className="font-display text-2xl tracking-tight text-white">Sign in to complete your booking</div>
+        <div className="mt-2 text-sm text-white/60">
+          Your booking history now syncs from the database, so you need an account before confirming a stay.
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button
+            onClick={() =>
+              navigate('/auth', {
+                state: {
+                  redirectTo: '/checkout',
+                  redirectState: state,
+                },
+              })
+            }
+          >
+            Sign in or create account
+          </Button>
+          <Button variant="secondary" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+        </div>
+      </Card>
+    )
+  }
+
   if (bookingId) {
     return (
       <Card className="p-8">
@@ -76,7 +114,7 @@ export default function Checkout() {
             </div>
             <div className="mt-6 font-display text-3xl tracking-tight text-white">You’re all set.</div>
             <div className="mt-3 text-sm text-white/65">
-              This is a demo booking stored locally in your browser.
+              Your booking has been saved to the database.
             </div>
           </div>
           <CheckCircle2 className="h-12 w-12 text-honey" />
@@ -166,18 +204,22 @@ export default function Checkout() {
                 <div>
                   <div className="text-sm text-white/75">Demo booking safety</div>
                   <div className="mt-1 text-xs text-white/50">
-                    No payment details are collected. Bookings are stored locally.
+                    No payment details are collected. Booking details are stored in your account.
                   </div>
                 </div>
               </div>
             </div>
 
+            {error ? <div className="rounded-2xl bg-red-400/10 px-4 py-3 text-sm text-red-100 ring-1 ring-red-300/20">{error}</div> : null}
+
             <Button
               className="h-12"
-              onClick={() => {
+              disabled={bookingLoading}
+              onClick={async () => {
                 setSubmitted(true)
+                setError(null)
                 if (hasBlockingErrors) return
-                const booking = createBooking({
+                const result = await createBooking({
                   hotelId: hotel.id,
                   roomId: room.id,
                   dateRange: { checkIn, checkOut },
@@ -185,13 +227,18 @@ export default function Checkout() {
                   guestInfo: { fullName: fullName.trim(), email: email.trim(), phone: phone.trim() },
                   totalPrice: total,
                 })
-                setBookingId(booking.id)
+                if (result.ok === false) {
+                  setError(result.message)
+                  return
+                }
+
+                setBookingId(result.booking.id)
               }}
             >
-              Confirm booking
+              {bookingLoading ? 'Saving booking...' : 'Confirm booking'}
             </Button>
 
-            <Button variant="ghost" className="h-11" onClick={() => navigate(-1)}>
+            <Button variant="ghost" className="h-11" disabled={bookingLoading} onClick={() => navigate(-1)}>
               Back
             </Button>
           </div>
@@ -252,4 +299,3 @@ export default function Checkout() {
     </div>
   )
 }
-

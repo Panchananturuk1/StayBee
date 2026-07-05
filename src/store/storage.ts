@@ -8,7 +8,7 @@ export function safeJsonParse<T>(value: string | null, fallback: T): T {
 }
 
 export const storageKeys = {
-  session: 'staybee_session',
+  sessionToken: 'staybee_session_token',
   wishlist: 'staybee_wishlist',
   bookings: 'staybee_bookings',
 } as const

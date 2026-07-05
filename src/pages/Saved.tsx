@@ -1,16 +1,39 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { HeartOff, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import HotelCard from '@/components/HotelCard'
 import { hotels } from '@/data/stays'
+import { useSessionStore } from '@/store/useSessionStore'
 import { useWishlistStore } from '@/store/useWishlistStore'
 
 export default function Saved() {
+  const navigate = useNavigate()
+  const user = useSessionStore((s) => s.user)
   const savedIds = useWishlistStore((s) => s.hotelIds)
+  const isLoading = useWishlistStore((s) => s.isLoading)
   const clear = useWishlistStore((s) => s.clear)
 
   const saved = hotels.filter((h) => savedIds.includes(h.id))
+
+  if (!user) {
+    return (
+      <Card className="p-10">
+        <div className="flex items-start gap-4">
+          <Sparkles className="h-6 w-6 text-honey" />
+          <div>
+            <div className="font-display text-2xl tracking-tight text-white">Sign in to save stays</div>
+            <div className="mt-2 text-sm text-white/60">
+              Saved stays now sync through the database and follow your account across devices.
+            </div>
+            <div className="mt-6">
+              <Button onClick={() => navigate('/auth', { state: { redirectTo: '/saved' } })}>Sign in</Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -22,7 +45,7 @@ export default function Saved() {
         </div>
 
         {saved.length ? (
-          <Button variant="secondary" onClick={clear}>
+          <Button variant="secondary" disabled={isLoading} onClick={() => void clear()}>
             <HeartOff className="h-4 w-4" />
             Clear
           </Button>
@@ -36,7 +59,7 @@ export default function Saved() {
             <div>
               <div className="font-display text-2xl tracking-tight text-white">Nothing saved yet</div>
               <div className="mt-2 text-sm text-white/60">
-                Tap the heart on a hotel card to keep it here.
+                {isLoading ? 'Loading your saved stays from the database.' : 'Tap the heart on a hotel card to keep it here.'}
               </div>
               <div className="mt-6">
                 <Link to="/search">
@@ -56,4 +79,3 @@ export default function Saved() {
     </div>
   )
 }
-
