@@ -35,8 +35,8 @@ export function sortHotels(hotels: Hotel[], sort: SearchState['sort']) {
   if (sort === 'rating') return list.sort((a, b) => b.rating - a.rating)
 
   return list.sort((a, b) => {
-    const aScore = clampNumber(a.rating, 0, 5) * 10 - a.priceFrom / 100
-    const bScore = clampNumber(b.rating, 0, 5) * 10 - b.priceFrom / 100
+    const aScore = clampNumber(a.rating, 0, 5) * 10 - a.priceFrom / 1000
+    const bScore = clampNumber(b.rating, 0, 5) * 10 - b.priceFrom / 1000
     return bScore - aScore
   })
 }
