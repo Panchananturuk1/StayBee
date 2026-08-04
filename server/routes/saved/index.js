@@ -1,6 +1,6 @@
-import { prisma } from '../lib/db.js'
-import { getAuthenticatedUser } from '../lib/auth.js'
-import { methodNotAllowed, sendError, sendException, sendJson } from '../lib/http.js'
+import { prisma } from '../../lib/db.js'
+import { getAuthenticatedUser } from '../../lib/auth.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../../lib/http.js'
 
 export default async function handler(req, res) {
   const auth = await getAuthenticatedUser(req)

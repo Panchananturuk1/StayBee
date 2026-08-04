@@ -1,7 +1,7 @@
-import { prisma } from '../../lib/db.js'
-import { getAuthenticatedUser } from '../../lib/auth.js'
-import { loadBookingLookups, serializeBooking } from '../../lib/bookings.js'
-import { methodNotAllowed, sendError, sendException, sendJson } from '../../lib/http.js'
+import { prisma } from '../../../lib/db.js'
+import { getAuthenticatedUser } from '../../../lib/auth.js'
+import { loadBookingLookups, serializeBooking } from '../../../lib/bookings.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../../../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

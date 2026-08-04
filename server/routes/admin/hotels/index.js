@@ -1,7 +1,7 @@
-import { prisma } from '../../lib/db.js'
-import { requireAdmin } from '../../lib/admin.js'
-import { buildHotelInclude, serializeHotel } from '../../lib/hotels.js'
-import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../../lib/http.js'
+import { prisma } from '../../../lib/db.js'
+import { requireAdmin } from '../../../lib/admin.js'
+import { buildHotelInclude, serializeHotel } from '../../../lib/hotels.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../../../lib/http.js'
 
 function parseHotelInput(body, { partial = false } = {}) {
   const errors = []

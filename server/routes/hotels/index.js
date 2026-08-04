@@ -1,12 +1,12 @@
-import { prisma } from '../lib/db.js'
+import { prisma } from '../../lib/db.js'
 import {
   buildHotelInclude,
   filterSerializedHotels,
   parseSearchFilters,
   serializeHotel,
   sortSerializedHotels,
-} from '../lib/hotels.js'
-import { methodNotAllowed, sendError, sendException, sendJson } from '../lib/http.js'
+} from '../../lib/hotels.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../../lib/http.js'
 
 async function loadBookingsByRoomIds(roomIds) {
   const map = new Map()

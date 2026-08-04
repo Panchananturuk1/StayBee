@@ -1,5 +1,5 @@
-import { deleteSession, getSessionToken } from '../lib/auth.js'
-import { methodNotAllowed, sendJson } from '../lib/http.js'
+import { deleteSession, getSessionToken } from '../../lib/auth.js'
+import { methodNotAllowed, sendJson } from '../../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

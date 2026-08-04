@@ -1,7 +1,7 @@
-import { prisma } from '../lib/db.js'
-import { createPasswordResetToken } from '../lib/password-reset.js'
-import { normalizeEmail } from '../lib/auth.js'
-import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../lib/http.js'
+import { prisma } from '../../lib/db.js'
+import { createPasswordResetToken } from '../../lib/password-reset.js'
+import { normalizeEmail } from '../../lib/auth.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
