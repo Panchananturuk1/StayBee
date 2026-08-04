@@ -1,3 +1,19 @@
+import authSignup from './routes/auth/signup.js'
+import authLogin from './routes/auth/login.js'
+import authLogout from './routes/auth/logout.js'
+import authSession from './routes/auth/session.js'
+import authForgotPassword from './routes/auth/forgot-password.js'
+import authResetPassword from './routes/auth/reset-password.js'
+import bookingsIndex from './routes/bookings/index.js'
+import bookingCancel from './routes/bookings/[bookingId]/cancel.js'
+import savedIndex from './routes/saved/index.js'
+import savedToggle from './routes/saved/toggle.js'
+import hotelsIndex from './routes/hotels/index.js'
+import hotelDetail from './routes/hotels/[hotelId].js'
+import hotelAvailability from './routes/hotels/[hotelId]/availability.js'
+import adminHotelsIndex from './routes/admin/hotels/index.js'
+import adminHotelDetail from './routes/admin/hotels/[hotelId].js'
+
 function readRequestBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = []
@@ -54,54 +70,54 @@ function ensureResponseHelpers(res) {
   }
 }
 
+const staticRoutes = {
+  '/api/auth/signup': authSignup,
+  '/api/auth/login': authLogin,
+  '/api/auth/logout': authLogout,
+  '/api/auth/session': authSession,
+  '/api/auth/forgot-password': authForgotPassword,
+  '/api/auth/reset-password': authResetPassword,
+  '/api/bookings': bookingsIndex,
+  '/api/saved': savedIndex,
+  '/api/saved/toggle': savedToggle,
+  '/api/hotels': hotelsIndex,
+  '/api/admin/hotels': adminHotelsIndex,
+}
+
 export function matchApiRoute(pathname) {
-  const staticRoutes = {
-    '/api/auth/signup': './routes/auth/signup.js',
-    '/api/auth/login': './routes/auth/login.js',
-    '/api/auth/logout': './routes/auth/logout.js',
-    '/api/auth/session': './routes/auth/session.js',
-    '/api/auth/forgot-password': './routes/auth/forgot-password.js',
-    '/api/auth/reset-password': './routes/auth/reset-password.js',
-    '/api/bookings': './routes/bookings/index.js',
-    '/api/saved': './routes/saved/index.js',
-    '/api/saved/toggle': './routes/saved/toggle.js',
-    '/api/hotels': './routes/hotels/index.js',
-    '/api/admin/hotels': './routes/admin/hotels/index.js',
-  }
-
   if (staticRoutes[pathname]) {
-    return { module: staticRoutes[pathname], query: {} }
+    return { handler: staticRoutes[pathname], query: {} }
   }
 
-  const bookingCancel = pathname.match(/^\/api\/bookings\/([^/]+)\/cancel$/)
-  if (bookingCancel) {
+  const bookingCancelMatch = pathname.match(/^\/api\/bookings\/([^/]+)\/cancel$/)
+  if (bookingCancelMatch) {
     return {
-      module: './routes/bookings/[bookingId]/cancel.js',
-      query: { bookingId: bookingCancel[1] },
+      handler: bookingCancel,
+      query: { bookingId: bookingCancelMatch[1] },
     }
   }
 
-  const hotelAvailability = pathname.match(/^\/api\/hotels\/([^/]+)\/availability$/)
-  if (hotelAvailability) {
+  const hotelAvailabilityMatch = pathname.match(/^\/api\/hotels\/([^/]+)\/availability$/)
+  if (hotelAvailabilityMatch) {
     return {
-      module: './routes/hotels/[hotelId]/availability.js',
-      query: { hotelId: hotelAvailability[1] },
+      handler: hotelAvailability,
+      query: { hotelId: hotelAvailabilityMatch[1] },
     }
   }
 
-  const hotelDetail = pathname.match(/^\/api\/hotels\/([^/]+)$/)
-  if (hotelDetail) {
+  const hotelDetailMatch = pathname.match(/^\/api\/hotels\/([^/]+)$/)
+  if (hotelDetailMatch) {
     return {
-      module: './routes/hotels/[hotelId].js',
-      query: { hotelId: hotelDetail[1] },
+      handler: hotelDetail,
+      query: { hotelId: hotelDetailMatch[1] },
     }
   }
 
-  const adminHotelDetail = pathname.match(/^\/api\/admin\/hotels\/([^/]+)$/)
-  if (adminHotelDetail) {
+  const adminHotelDetailMatch = pathname.match(/^\/api\/admin\/hotels\/([^/]+)$/)
+  if (adminHotelDetailMatch) {
     return {
-      module: './routes/admin/hotels/[hotelId].js',
-      query: { hotelId: adminHotelDetail[1] },
+      handler: adminHotelDetail,
+      query: { hotelId: adminHotelDetailMatch[1] },
     }
   }
 
@@ -128,17 +144,7 @@ export async function handleApiRequest(req, res) {
     anyReq.method = method
 
     await attachJsonBody(anyReq, method)
-
-    const mod = await import(new URL(match.module, import.meta.url).href)
-    const handler = mod?.default
-
-    if (typeof handler !== 'function') {
-      res.statusCode = 404
-      res.end()
-      return
-    }
-
-    await handler(anyReq, res)
+    await match.handler(anyReq, res)
   } catch (error) {
     console.error(`[staybee-api] ${method} ${pathname} failed`, error)
 
