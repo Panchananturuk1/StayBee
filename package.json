@@ -3,12 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
     "dev": "vite",
     "build": "prisma generate && tsc -b && vite build",
+    "vercel-build": "prisma generate && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
@@ -28,7 +32,8 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.3.0",
     "tailwind-merge": "^3.0.2",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "prisma": "^6.11.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
@@ -39,7 +44,6 @@
     "autoprefixer": "^10.4.21",
     "babel-plugin-react-dev-locator": "^1.0.0",
     "postcss": "^8.5.3",
-    "prisma": "^6.11.1",
     "tailwindcss": "^3.4.17",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
