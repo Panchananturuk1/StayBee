@@ -23,7 +23,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.7,
     reviewCount: 812,
-    priceFrom: 189,
+    priceFrom: 2499,
     amenities: ['wifi', 'breakfast', 'parking', 'petFriendly'],
     blurb: 'A quiet, design-forward stay two blocks from the late-night pulse of Mitte.',
     rooms: [
@@ -32,7 +32,7 @@ export const hotels: Hotel[] = [
         name: 'Ink Studio',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 189,
+        pricePerNight: 2499,
         images: [
           staybeeImage(
             'photorealistic small boutique hotel studio room, ink-black accent wall, honey-gold bedside lamp, soft shadows, modern minimal furniture, high detail',
@@ -45,7 +45,7 @@ export const hotels: Hotel[] = [
         name: 'Honey Deluxe',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 239,
+        pricePerNight: 3299,
         images: [
           staybeeImage(
             'photorealistic boutique hotel deluxe room, warm amber highlights, large window, modern chair, clean lines, cinematic lighting, ultra detailed',
@@ -58,7 +58,7 @@ export const hotels: Hotel[] = [
         name: 'Aurora Suite',
         occupancy: 4,
         refundable: false,
-        pricePerNight: 319,
+        pricePerNight: 4999,
         images: [
           staybeeImage(
             'photorealistic boutique hotel suite, cozy lounge corner, velvet sofa, brass table, moody night lighting, cinematic wide angle',
@@ -107,7 +107,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.6,
     reviewCount: 1204,
-    priceFrom: 142,
+    priceFrom: 999,
     amenities: ['wifi', 'pool', 'spa', 'breakfast', 'parking'],
     blurb: 'Rain-kissed calm on the river—cool tiles, slow mornings, and a pool that stays open late.',
     rooms: [
@@ -116,7 +116,7 @@ export const hotels: Hotel[] = [
         name: 'Garden King',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 142,
+        pricePerNight: 999,
         images: [
           staybeeImage(
             'photorealistic tropical resort garden king room, natural textures, warm lighting, minimal decor, high detail',
@@ -129,7 +129,7 @@ export const hotels: Hotel[] = [
         name: 'River View Twin',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 176,
+        pricePerNight: 1499,
         images: [
           staybeeImage(
             'photorealistic resort room with twin beds and river view, soft daylight, airy curtains, cinematic, ultra detailed',
@@ -142,7 +142,7 @@ export const hotels: Hotel[] = [
         name: 'Lantern Suite',
         occupancy: 4,
         refundable: false,
-        pricePerNight: 228,
+        pricePerNight: 2199,
         images: [
           staybeeImage(
             'photorealistic resort suite living area, lantern lighting, teak wood, calm luxury, cinematic wide angle',
@@ -191,7 +191,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.5,
     reviewCount: 634,
-    priceFrom: 165,
+    priceFrom: 1799,
     amenities: ['wifi', 'breakfast', 'seaView', 'gym'],
     blurb: 'A clean-lined oceanfront stay with rooftop sunsets and excellent espresso.',
     rooms: [
@@ -200,7 +200,7 @@ export const hotels: Hotel[] = [
         name: 'Compact Queen',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 165,
+        pricePerNight: 1799,
         images: [
           staybeeImage(
             'photorealistic compact modern hotel room, queen bed, warm accent light, clean lines, high detail, cinematic',
@@ -213,7 +213,7 @@ export const hotels: Hotel[] = [
         name: 'Sea View King',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 204,
+        pricePerNight: 2599,
         images: [
           staybeeImage(
             'photorealistic hotel room with large window facing ocean, minimal design, soft coastal light, ultra detailed',
@@ -226,7 +226,7 @@ export const hotels: Hotel[] = [
         name: 'Corner Studio',
         occupancy: 4,
         refundable: false,
-        pricePerNight: 248,
+        pricePerNight: 3799,
         images: [
           staybeeImage(
             'photorealistic corner studio hotel room, lounge chair, ocean horizon, golden hour light, cinematic wide angle',
@@ -275,7 +275,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.8,
     reviewCount: 957,
-    priceFrom: 214,
+    priceFrom: 2999,
     amenities: ['wifi', 'breakfast', 'spa'],
     blurb: 'A calm courtyard, modern comfort, and a tea ritual that slows everything down.',
     rooms: [
@@ -284,7 +284,7 @@ export const hotels: Hotel[] = [
         name: 'Twin Tatami',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 214,
+        pricePerNight: 2999,
         images: [
           staybeeImage(
             'photorealistic boutique hotel twin room with tatami-inspired textures, warm lantern light, minimalist design, cinematic',
@@ -297,7 +297,7 @@ export const hotels: Hotel[] = [
         name: 'Courtyard King',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 262,
+        pricePerNight: 3999,
         images: [
           staybeeImage(
             'photorealistic boutique hotel king room with view into courtyard, warm lighting, natural wood, ultra detailed',
@@ -310,7 +310,7 @@ export const hotels: Hotel[] = [
         name: 'Kyoto Suite',
         occupancy: 4,
         refundable: false,
-        pricePerNight: 336,
+        pricePerNight: 5499,
         images: [
           staybeeImage(
             'photorealistic boutique suite with low seating area, textured walls, calm luxury, cinematic wide angle, high detail',
@@ -359,7 +359,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.4,
     reviewCount: 488,
-    priceFrom: 129,
+    priceFrom: 1199,
     amenities: ['wifi', 'gym', 'parking', 'petFriendly'],
     blurb: 'Long-stay comfort with a real kitchen and a coworking lounge that stays quiet.',
     rooms: [
@@ -368,7 +368,7 @@ export const hotels: Hotel[] = [
         name: 'Studio Loft',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 129,
+        pricePerNight: 1199,
         images: [
           staybeeImage(
             'photorealistic serviced apartment studio loft, warm lighting, modern kitchen corner, clean minimal design, high detail',
@@ -381,7 +381,7 @@ export const hotels: Hotel[] = [
         name: 'One-Bedroom',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 159,
+        pricePerNight: 1699,
         images: [
           staybeeImage(
             'photorealistic one-bedroom serviced apartment, cozy living area, warm lamp, modern decor, cinematic wide angle',
@@ -394,7 +394,7 @@ export const hotels: Hotel[] = [
         name: 'Two-Bedroom',
         occupancy: 5,
         refundable: false,
-        pricePerNight: 219,
+        pricePerNight: 2499,
         images: [
           staybeeImage(
             'photorealistic two-bedroom serviced apartment, bright living room, clean modern furniture, high detail, cinematic',
@@ -443,7 +443,7 @@ export const hotels: Hotel[] = [
     ],
     rating: 4.9,
     reviewCount: 301,
-    priceFrom: 276,
+    priceFrom: 3499,
     amenities: ['wifi', 'pool', 'spa', 'seaView', 'breakfast'],
     blurb: 'High altitude calm with ocean views, a stone-and-wood spa, and sunrise silence.',
     rooms: [
@@ -452,7 +452,7 @@ export const hotels: Hotel[] = [
         name: 'Ridge King',
         occupancy: 2,
         refundable: true,
-        pricePerNight: 276,
+        pricePerNight: 3499,
         images: [
           staybeeImage(
             'photorealistic luxury resort king room, panoramic window, warm accent lights, modern natural textures, cinematic, high detail',
@@ -465,7 +465,7 @@ export const hotels: Hotel[] = [
         name: 'Pool Villa',
         occupancy: 3,
         refundable: true,
-        pricePerNight: 344,
+        pricePerNight: 4599,
         images: [
           staybeeImage(
             'photorealistic private pool villa terrace at dusk, ocean view, warm lighting, cinematic wide angle, ultra detailed',
@@ -478,7 +478,7 @@ export const hotels: Hotel[] = [
         name: 'Solstice Suite',
         occupancy: 4,
         refundable: false,
-        pricePerNight: 418,
+        pricePerNight: 6000,
         images: [
           staybeeImage(
             'photorealistic luxury suite living area, textured walls, warm honey-gold lighting, ocean view, cinematic, ultra detailed',
