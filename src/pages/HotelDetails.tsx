@@ -1,15 +1,26 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, MapPin } from 'lucide-react'
-import { getHotelById } from '@/data/stays'
+import { ArrowLeft, Check, MapPin, Minus, Plus } from 'lucide-react'
+import AvailabilityCalendar from '@/components/AvailabilityCalendar'
 import Gallery from '@/components/Gallery'
 import RoomCard from '@/components/RoomCard'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import Input from '@/components/ui/Input'
 import Rating from '@/components/Rating'
+import { useRoomAvailability } from '@/hooks/useRoomAvailability'
+import { fetchHotelById } from '@/services/hotels'
 import { useSearchStore } from '@/store/useSearchStore'
-import { formatCompactDate, nightsBetween, formatCurrency } from '@/utils/format'
+import type { Hotel } from '@/types/stay'
+import {
+  addDaysToDateInput,
+  formatCompactDate,
+  formatCurrency,
+  nightsBetween,
+  todayDateInputValue,
+  toDateInputValue,
+} from '@/utils/format'
 
 const amenityLabels: Record<string, string> = {
   wifi: 'Wi‑Fi',
@@ -29,8 +40,70 @@ export default function HotelDetails() {
   const checkIn = useSearchStore((s) => s.checkIn)
   const checkOut = useSearchStore((s) => s.checkOut)
   const guests = useSearchStore((s) => s.guests)
+  const setBasics = useSearchStore((s) => s.setBasics)
 
-  const hotel = useMemo(() => (hotelId ? getHotelById(hotelId) : undefined), [hotelId])
+  const today = todayDateInputValue()
+  const minCheckOut = checkIn ? addDaysToDateInput(checkIn, 1) : addDaysToDateInput(today, 1)
+
+  useEffect(() => {
+    const { checkIn: currentCheckIn, checkOut: currentCheckOut, setBasics: updateBasics } =
+      useSearchStore.getState()
+    if (currentCheckIn && currentCheckOut) return
+
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const dayAfter = new Date()
+    dayAfter.setDate(dayAfter.getDate() + 2)
+
+    updateBasics({
+      checkIn: currentCheckIn || toDateInputValue(tomorrow),
+      checkOut: currentCheckOut || toDateInputValue(dayAfter),
+    })
+  }, [])
+
+  const [hotel, setHotel] = useState<Hotel | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedRoomId, setSelectedRoomId] = useState('')
+
+  useEffect(() => {
+    if (!hotelId) return
+
+    let cancelled = false
+    setIsLoading(true)
+
+    void fetchHotelById(hotelId, checkIn, checkOut)
+      .then((data) => {
+        if (cancelled) return
+        setHotel(data)
+        setSelectedRoomId((current) => current || data.rooms[0]?.id || '')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setHotel(null)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [checkIn, checkOut, hotelId])
+
+  const calendarMonth = checkIn ? checkIn.slice(0, 7) : today.slice(0, 7)
+  const { days, isLoading: calendarLoading } = useRoomAvailability(
+    hotel?.id || '',
+    selectedRoomId,
+    calendarMonth,
+  )
+
+  if (isLoading) {
+    return (
+      <Card className="p-8">
+        <div className="font-display text-2xl tracking-tight text-white">Loading hotel…</div>
+      </Card>
+    )
+  }
 
   if (!hotel) {
     return (
@@ -84,18 +157,57 @@ export default function HotelDetails() {
           <Card className="sticky top-28 p-5">
             <div className="text-xs font-medium tracking-wide text-white/55">Your plan</div>
             <div className="mt-2 font-display text-xl tracking-tight text-white">Dates & guests</div>
-            <div className="mt-4 space-y-3 text-sm text-white/60">
-              <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                <div>Check in</div>
-                <div className="text-white/85">{checkIn ? formatCompactDate(checkIn) : '—'}</div>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                <div>Check out</div>
-                <div className="text-white/85">{checkOut ? formatCompactDate(checkOut) : '—'}</div>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                <div>Guests</div>
-                <div className="text-white/85">{guests}</div>
+            <div className="mt-4 space-y-3">
+              <Input
+                label="Check in"
+                type="date"
+                min={today}
+                value={checkIn}
+                onChange={(e) => {
+                  const nextCheckIn = e.target.value
+                  const updates: { checkIn: string; checkOut?: string } = { checkIn: nextCheckIn }
+                  if (checkOut && nextCheckIn && checkOut <= nextCheckIn) {
+                    updates.checkOut = addDaysToDateInput(nextCheckIn, 1)
+                  }
+                  setBasics(updates)
+                }}
+                className="[color-scheme:dark]"
+              />
+              <Input
+                label="Check out"
+                type="date"
+                min={minCheckOut}
+                value={checkOut}
+                onChange={(e) => setBasics({ checkOut: e.target.value })}
+                className="[color-scheme:dark]"
+              />
+              <div>
+                <div className="mb-2 text-xs font-medium tracking-wide text-white/70">Guests</div>
+                <div className="flex items-center justify-between rounded-2xl bg-white/5 px-3 py-2 ring-1 ring-white/10">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 px-0"
+                    disabled={guests <= 1}
+                    aria-label="Decrease guests"
+                    onClick={() => setBasics({ guests: Math.max(1, guests - 1) })}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="min-w-[2rem] text-center text-sm font-medium text-white">{guests}</div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 px-0"
+                    disabled={guests >= 6}
+                    aria-label="Increase guests"
+                    onClick={() => setBasics({ guests: Math.min(6, guests + 1) })}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -135,7 +247,7 @@ export default function HotelDetails() {
               <span className="ml-2 text-base text-white/55">/ night</span>
             </div>
             <div className="mt-4 text-sm text-white/60">
-              Prices are demo values and may not reflect real-time availability.
+              Prices update by date, with weekend rates on Friday and Saturday.
             </div>
             <div className="mt-6">
               <Link to="/search">
@@ -155,11 +267,24 @@ export default function HotelDetails() {
         </div>
         <div className="space-y-4">
           {hotel.rooms.map((room) => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              onSelect={(roomId) => navigate('/checkout', { state: { hotelId: hotel.id, roomId } })}
-            />
+            <div key={room.id} className="space-y-4">
+              <RoomCard
+                room={room}
+                onSelect={(roomId) => {
+                  setSelectedRoomId(roomId)
+                  navigate('/checkout', { state: { hotelId: hotel.id, roomId } })
+                }}
+              />
+              {selectedRoomId === room.id ? (
+                <AvailabilityCalendar days={days} month={calendarMonth} isLoading={calendarLoading} />
+              ) : (
+                <div className="flex justify-end">
+                  <Button variant="secondary" onClick={() => setSelectedRoomId(room.id)}>
+                    View availability calendar
+                  </Button>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </section>

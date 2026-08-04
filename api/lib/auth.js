@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs'
 import { prisma } from './db.js'
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30
-
 export function normalizeEmail(email) {
   return email.trim().toLowerCase()
 }
@@ -13,6 +12,7 @@ export function serializeUser(user) {
     id: user.id,
     email: user.email,
     fullName: user.fullName,
+    role: user.role === 'ADMIN' ? 'admin' : 'user',
   }
 }
 

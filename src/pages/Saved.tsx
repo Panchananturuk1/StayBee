@@ -1,11 +1,13 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { HeartOff, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import HotelCard from '@/components/HotelCard'
-import { hotels } from '@/data/stays'
+import { fetchHotelsByIds } from '@/services/hotels'
 import { useSessionStore } from '@/store/useSessionStore'
 import { useWishlistStore } from '@/store/useWishlistStore'
+import type { Hotel } from '@/types/stay'
 
 export default function Saved() {
   const navigate = useNavigate()
@@ -13,8 +15,11 @@ export default function Saved() {
   const savedIds = useWishlistStore((s) => s.hotelIds)
   const isLoading = useWishlistStore((s) => s.isLoading)
   const clear = useWishlistStore((s) => s.clear)
+  const [saved, setSaved] = useState<Hotel[]>([])
 
-  const saved = hotels.filter((h) => savedIds.includes(h.id))
+  useEffect(() => {
+    void fetchHotelsByIds(savedIds).then(setSaved)
+  }, [savedIds])
 
   if (!user) {
     return (

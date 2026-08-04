@@ -5,6 +5,7 @@ export type SessionUser = {
   id: string
   email: string
   fullName: string
+  role: 'user' | 'admin'
 }
 
 type SessionState = {
@@ -14,6 +15,10 @@ type SessionState = {
   hydrate: () => Promise<void>
   signIn: (email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>
   signUp: (fullName: string, email: string, password: string) => Promise<{ ok: true } | { ok: false; message: string }>
+  requestPasswordReset: (
+    email: string,
+  ) => Promise<{ ok: true; message: string; resetPath?: string } | { ok: false; message: string }>
+  resetPassword: (token: string, password: string) => Promise<{ ok: true; message: string } | { ok: false; message: string }>
   signOut: () => Promise<void>
 }
 
@@ -91,6 +96,57 @@ export const useSessionStore = create<SessionState>()((set) => ({
       return {
         ok: false,
         message: error instanceof ApiError ? error.message : 'Unable to create your account right now.',
+      }
+    }
+  },
+  requestPasswordReset: async (email) => {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      return { ok: false, message: 'Enter a valid email.' }
+    }
+
+    set({ isLoading: true })
+
+    try {
+      const data = await apiFetch<{ message: string; resetPath?: string }>('/api/auth/forgot-password', {
+        method: 'POST',
+        body: { email: normalizedEmail },
+      })
+
+      set({ isLoading: false })
+      return { ok: true, message: data.message, resetPath: data.resetPath }
+    } catch (error) {
+      set({ isLoading: false })
+      return {
+        ok: false,
+        message: error instanceof ApiError ? error.message : 'Unable to process your reset request right now.',
+      }
+    }
+  },
+  resetPassword: async (token, password) => {
+    if (!token.trim()) {
+      return { ok: false, message: 'Reset token is required.' }
+    }
+
+    if (password.length < 6) {
+      return { ok: false, message: 'Password must be at least 6 characters.' }
+    }
+
+    set({ isLoading: true })
+
+    try {
+      const data = await apiFetch<{ message: string }>('/api/auth/reset-password', {
+        method: 'POST',
+        body: { token, password },
+      })
+
+      set({ isLoading: false })
+      return { ok: true, message: data.message }
+    } catch (error) {
+      set({ isLoading: false })
+      return {
+        ok: false,
+        message: error instanceof ApiError ? error.message : 'Unable to reset your password right now.',
       }
     }
   },

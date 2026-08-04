@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CheckCircle2, Shield, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
@@ -6,7 +6,8 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
 import StaybeeImage from '@/components/StaybeeImage'
-import { getHotelById } from '@/data/stays'
+import { fetchHotelById } from '@/services/hotels'
+import type { Hotel } from '@/types/stay'
 import { useSearchStore } from '@/store/useSearchStore'
 import { useBookingStore } from '@/store/useBookingStore'
 import { useSessionStore } from '@/store/useSessionStore'
@@ -28,8 +29,8 @@ export default function Checkout() {
   const bookingLoading = useBookingStore((s) => s.isLoading)
   const user = useSessionStore((s) => s.user)
 
-  const hotel = useMemo(() => (state ? getHotelById(state.hotelId) : undefined), [state])
-  const room = useMemo(() => hotel?.rooms.find((r) => r.id === state?.roomId), [hotel, state?.roomId])
+  const [hotel, setHotel] = useState<Hotel | null>(null)
+  const room = hotel?.rooms.find((r) => r.id === state?.roomId)
 
   const [fullName, setFullName] = useState(user?.fullName || '')
   const [email, setEmail] = useState(user?.email || '')
@@ -39,13 +40,18 @@ export default function Checkout() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!state?.hotelId) return
+    void fetchHotelById(state.hotelId, checkIn, checkOut).then(setHotel).catch(() => setHotel(null))
+  }, [checkIn, checkOut, state?.hotelId])
+
+  useEffect(() => {
     if (!user) return
     setFullName((current) => current || user.fullName)
     setEmail((current) => current || user.email)
   }, [user])
 
   const nights = nightsBetween(checkIn, checkOut) || 1
-  const total = room ? room.pricePerNight * nights : 0
+  const total = room?.stayTotal ?? (room ? room.pricePerNight * nights : 0)
 
   const errors = {
     fullName: !fullName.trim() ? 'Full name is required.' : '',

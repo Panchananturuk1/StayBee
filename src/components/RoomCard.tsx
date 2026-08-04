@@ -12,6 +12,15 @@ export default function RoomCard({
   room: Room
   onSelect: (roomId: string) => void
 }) {
+  const availabilityLabel =
+    room.soldOut
+      ? 'Sold out for selected dates'
+      : room.limited && typeof room.availableUnits === 'number'
+        ? `Only ${room.availableUnits} left`
+        : typeof room.availableUnits === 'number'
+          ? `${room.availableUnits} rooms available`
+          : null
+
   return (
     <Card className="overflow-hidden">
       <div className="grid gap-4 md:grid-cols-12 md:items-stretch">
@@ -32,23 +41,31 @@ export default function RoomCard({
                 <Badge tone={room.refundable ? 'good' : 'bad'}>
                   {room.refundable ? 'refundable' : 'non‑refundable'}
                 </Badge>
+                {room.limited ? <Badge tone="honey">Limited</Badge> : null}
+                {room.soldOut ? <Badge tone="bad">Sold out</Badge> : null}
               </div>
             </div>
 
             <div className="mt-3 text-sm text-white/60">
-              A calm, well-lit room with fast check-in and a clean, quiet layout.
+              {availabilityLabel || 'A calm, well-lit room with fast check-in and a clean, quiet layout.'}
             </div>
           </div>
 
           <div className="mt-5 flex items-center justify-between gap-4">
             <div className="text-sm text-white/60">
               <span className="text-white/90">{formatCurrency(room.pricePerNight)}</span> / night
+              {typeof room.stayTotal === 'number' && room.stayTotal > 0 ? (
+                <div className="mt-1 text-xs text-white/45">
+                  Stay total {formatCurrency(room.stayTotal)}
+                </div>
+              ) : null}
             </div>
-            <Button onClick={() => onSelect(room.id)}>Select</Button>
+            <Button disabled={room.soldOut} onClick={() => onSelect(room.id)}>
+              {room.soldOut ? 'Unavailable' : 'Select'}
+            </Button>
           </div>
         </div>
       </div>
     </Card>
   )
 }
-

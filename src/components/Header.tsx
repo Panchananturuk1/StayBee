@@ -60,6 +60,7 @@ export default function Header() {
           <NavItem to="/" label="Explore" icon={Compass} />
           <NavItem to="/saved" label="Saved" icon={Bookmark} />
           <NavItem to="/bookings" label="Bookings" icon={CalendarCheck} />
+          {user?.role === 'admin' ? <NavItem to="/admin/hotels" label="Admin" icon={Compass} /> : null}
         </nav>
 
         <div className="flex items-center gap-2">

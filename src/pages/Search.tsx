@@ -1,26 +1,52 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 import HotelCard from '@/components/HotelCard'
 import FiltersPanel from '@/components/FiltersPanel'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import SearchBar from '@/components/SearchBar'
-import { hotels } from '@/data/stays'
-import { filterHotels, sortHotels } from '@/services/search'
+import { fetchHotels } from '@/services/hotels'
 import { useSearchStore } from '@/store/useSearchStore'
+import type { Hotel } from '@/types/stay'
 
 export default function Search() {
   const [showFilters, setShowFilters] = useState(false)
   const [visible, setVisible] = useState(6)
+  const [results, setResults] = useState<Hotel[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   const location = useSearchStore((s) => s.location)
+  const checkIn = useSearchStore((s) => s.checkIn)
+  const checkOut = useSearchStore((s) => s.checkOut)
+  const guests = useSearchStore((s) => s.guests)
   const sort = useSearchStore((s) => s.sort)
   const filters = useSearchStore((s) => s.filters)
   const setSort = useSearchStore((s) => s.setSort)
 
-  const results = useMemo(() => {
-    const filtered = filterHotels(hotels, { location }, filters)
-    return sortHotels(filtered, sort)
-  }, [location, filters, sort])
+  useEffect(() => {
+    let cancelled = false
+    setIsLoading(true)
+    setError(null)
+
+    void fetchHotels({ location, checkIn, checkOut, guests, sort, filters })
+      .then((hotels) => {
+        if (cancelled) return
+        setResults(hotels)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError('Unable to load search results right now.')
+        setResults([])
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [checkIn, checkOut, filters, guests, location, sort])
 
   const shown = results.slice(0, visible)
 
@@ -30,10 +56,10 @@ export default function Search() {
         <div>
           <div className="text-xs font-medium tracking-wide text-white/55">Search</div>
           <h1 className="mt-2 font-display text-3xl tracking-tight text-white">
-            {results.length} stays {location ? `near “${location}”` : 'picked for you'}
+            {isLoading ? 'Searching stays…' : `${results.length} stays`} {location ? `near “${location}”` : 'picked for you'}
           </h1>
           <div className="mt-2 text-sm text-white/55">
-            Adjust filters for a tighter match — ratings and price balance are weighted into “best value”.
+            Results come from the database and respect your selected dates, guests, and availability.
           </div>
         </div>
 
@@ -80,20 +106,28 @@ export default function Search() {
             </div>
           ) : null}
 
-          {results.length === 0 ? (
+          {error ? (
+            <Card className="p-8">
+              <div className="font-display text-2xl tracking-tight text-white">{error}</div>
+            </Card>
+          ) : null}
+
+          {!error && !isLoading && results.length === 0 ? (
             <Card className="p-8">
               <div className="font-display text-2xl tracking-tight text-white">No matches</div>
               <div className="mt-2 text-sm text-white/60">
-                Try clearing amenities or widening your price range.
+                Try clearing amenities, widening your price range, or choosing different dates.
               </div>
             </Card>
-          ) : (
+          ) : null}
+
+          {!error && results.length > 0 ? (
             <div className="grid gap-5">
               {shown.map((h) => (
                 <HotelCard key={h.id} hotel={h} />
               ))}
             </div>
-          )}
+          ) : null}
 
           {results.length > shown.length ? (
             <div className="mt-6 flex justify-center">
