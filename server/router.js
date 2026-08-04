@@ -84,6 +84,29 @@ const staticRoutes = {
   '/api/admin/hotels': adminHotelsIndex,
 }
 
+function resolveRequestUrl(req) {
+  const rawUrl = req.url || '/'
+  const url = new URL(rawUrl, 'http://localhost')
+
+  if (url.pathname === '/api') {
+    const subpath = url.searchParams.get('__path')
+    if (subpath !== null) {
+      const pathname = subpath ? `/api/${subpath}` : '/api'
+      url.searchParams.delete('__path')
+      return new URL(`${pathname}?${url.searchParams}`, 'http://localhost')
+    }
+  }
+
+  const pathQuery = req.query?.path
+  if (pathQuery && (url.pathname === '/api' || url.pathname.endsWith('/api'))) {
+    const suffix = Array.isArray(pathQuery) ? pathQuery.join('/') : String(pathQuery)
+    const pathname = suffix ? `/api/${suffix}` : '/api'
+    return new URL(`${pathname}?${url.searchParams}`, 'http://localhost')
+  }
+
+  return url
+}
+
 export function matchApiRoute(pathname) {
   if (staticRoutes[pathname]) {
     return { handler: staticRoutes[pathname], query: {} }
@@ -126,8 +149,9 @@ export function matchApiRoute(pathname) {
 
 export async function handleApiRequest(req, res) {
   const method = req.method || 'GET'
-  const url = new URL(req.url || '/', 'http://localhost')
+  const url = resolveRequestUrl(req)
   const pathname = url.pathname
+  req.url = `${url.pathname}${url.search}`
   const match = matchApiRoute(pathname)
 
   if (!match) {
