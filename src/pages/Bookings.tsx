@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CalendarX2, ReceiptText } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import { hotels } from '@/data/stays'
 import { useBookingStore } from '@/store/useBookingStore'
 import { useSessionStore } from '@/store/useSessionStore'
 import { formatCompactDate, formatCurrency } from '@/utils/format'
@@ -14,11 +13,15 @@ export default function Bookings() {
   const navigate = useNavigate()
   const bookings = useBookingStore((s) => s.bookings)
   const isLoading = useBookingStore((s) => s.isLoading)
+  const loadBookings = useBookingStore((s) => s.loadBookings)
   const cancelBooking = useBookingStore((s) => s.cancelBooking)
   const user = useSessionStore((s) => s.user)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
 
-  const hotelById = useMemo(() => new Map(hotels.map((h) => [h.id, h])), [])
+  useEffect(() => {
+    if (!user) return
+    void loadBookings()
+  }, [loadBookings, user])
 
   if (!user) {
     return (
@@ -67,16 +70,18 @@ export default function Bookings() {
       ) : (
         <div className="grid gap-4">
           {bookings.map((b) => {
-            const hotel = hotelById.get(b.hotelId)
-            const room = hotel?.rooms.find((r) => r.id === b.roomId)
+            const hotelName = b.hotel?.name || 'Unknown hotel'
+            const hotelLocation = b.hotel?.location
+            const hotelImage = b.hotel?.images?.[0]
+            const roomName = b.room?.name || 'Room'
             const isCancelled = b.status === 'cancelled'
             return (
               <Card key={b.id} className="overflow-hidden">
                 <div className="grid gap-4 md:grid-cols-12 md:items-stretch">
                   <div className="md:col-span-4">
                     <StaybeeImage
-                      src={hotel?.images[0]}
-                      alt={hotel?.name || 'Hotel'}
+                      src={hotelImage}
+                      alt={hotelName}
                       className="h-48 w-full object-cover md:h-full"
                       loading="lazy"
                     />
@@ -85,14 +90,14 @@ export default function Bookings() {
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
                         <div className="font-display text-2xl tracking-tight text-white">
-                          {hotel?.name || 'Unknown hotel'}
+                          {hotelName}
                         </div>
-                        <div className="mt-1 text-sm text-white/55">{hotel?.location}</div>
+                        <div className="mt-1 text-sm text-white/55">{hotelLocation}</div>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <Badge tone={isCancelled ? 'bad' : 'good'}>
                             {isCancelled ? 'cancelled' : 'confirmed'}
                           </Badge>
-                          <Badge tone="neutral">{room?.name || 'Room'}</Badge>
+                          <Badge tone="neutral">{roomName}</Badge>
                           <Badge tone="neutral">{b.guests} guests</Badge>
                         </div>
                       </div>

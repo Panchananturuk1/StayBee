@@ -71,7 +71,7 @@ export default function StaybeeImage({
       loading={imgProps.loading ?? 'lazy'}
       onLoad={(e) => {
         onLoad?.(e)
-        if (failed || !src) return
+        if (failed || !src || !src.includes('trae.ai')) return
 
         const img = e.currentTarget
         const generating = isGeneratingPlaceholder(img, expectedAspect)

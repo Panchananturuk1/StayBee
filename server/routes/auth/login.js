@@ -1,6 +1,6 @@
-import { prisma } from '../lib/db.js'
-import { createSession, normalizeEmail, serializeUser, verifyPassword } from '../lib/auth.js'
-import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../lib/http.js'
+import { prisma } from '../../lib/db.js'
+import { createSession, normalizeEmail, serializeUser, verifyPassword } from '../../lib/auth.js'
+import { methodNotAllowed, readJson, sendError, sendException, sendJson } from '../../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

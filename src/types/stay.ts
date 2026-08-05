@@ -16,7 +16,23 @@ export type Room = {
   occupancy: number
   refundable: boolean
   pricePerNight: number
+  basePrice?: number
+  totalUnits?: number
+  availableUnits?: number
+  soldOut?: boolean
+  limited?: boolean
+  stayTotal?: number
   images: string[]
+}
+
+export type CalendarDay = {
+  date: string
+  price: number
+  availableUnits: number
+  totalUnits: number
+  status: 'available' | 'limited' | 'soldout'
+  checkInAllowed: boolean
+  checkOutAllowed: boolean
 }
 
 export type Review = {
@@ -66,4 +82,14 @@ export type Booking = {
   totalPrice: number
   status: BookingStatus
   createdAt: string
+  hotel?: {
+    id: string
+    name: string
+    location: string
+    images: string[]
+  } | null
+  room?: {
+    id: string
+    name: string
+  } | null
 }

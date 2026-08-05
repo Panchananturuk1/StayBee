@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { KeyRound, UserRound } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -11,6 +11,7 @@ type Mode = 'signin' | 'signup'
 type AuthRedirectState = {
   redirectTo?: string
   redirectState?: unknown
+  passwordReset?: string
 } | null
 
 export default function Auth() {
@@ -27,6 +28,13 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (redirect?.passwordReset) {
+      setSuccess(redirect.passwordReset)
+    }
+  }, [redirect?.passwordReset])
 
   const goAfterAuth = () => {
     if (redirect?.redirectTo) {
@@ -82,6 +90,20 @@ export default function Auth() {
             onChange={(e) => setPassword(e.target.value)}
             hint="Minimum 6 characters"
           />
+
+          {mode === 'signin' ? (
+            <div className="text-right text-sm">
+              <Link to="/auth/forgot-password" className="text-honey hover:text-honey/90">
+                Forgot password?
+              </Link>
+            </div>
+          ) : null}
+
+          {success ? (
+            <div className="rounded-2xl bg-honey/10 px-4 py-3 text-sm text-white/80 ring-1 ring-honey/15">
+              {success}
+            </div>
+          ) : null}
 
           {error ? <div className="rounded-2xl bg-red-400/10 px-4 py-3 text-sm text-red-100 ring-1 ring-red-300/20">{error}</div> : null}
 

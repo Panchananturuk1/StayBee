@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -13,16 +14,30 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PropertyType {
+  hotel
+  resort
+  boutique
+  apartment
+}
+
 model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  fullName     String
-  passwordHash String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  sessions     Session[]
-  bookings     Booking[]
-  savedHotels  SavedHotel[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  fullName            String
+  passwordHash        String
+  role                UserRole             @default(USER)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  sessions            Session[]
+  bookings            Booking[]
+  savedHotels         SavedHotel[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Session {
@@ -34,6 +49,74 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Hotel {
+  id           String       @id
+  name         String
+  location     String
+  propertyType PropertyType
+  blurb        String
+  rating       Float        @default(4.5)
+  reviewCount  Int          @default(0)
+  images       String[]
+  amenities    String[]
+  rooms        Room[]
+  reviews      Review[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Room {
+  id          String          @id
+  hotelId     String
+  name        String
+  occupancy   Int
+  refundable  Boolean         @default(true)
+  basePrice   Int
+  totalUnits  Int             @default(2)
+  images      String[]
+  hotel       Hotel           @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  priceRules  RoomPriceRule[]
+
+  @@index([hotelId])
+}
+
+model RoomPriceRule {
+  id        String @id @default(cuid())
+  roomId    String
+  label     String
+  dayOfWeek Int?
+  date      String?
+  price     Int
+  room      Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([roomId, date])
+}
+
+model Review {
+  id      String @id @default(cuid())
+  hotelId String
+  author  String
+  rating  Float
+  date    String
+  title   String
+  body    String
+  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@index([hotelId])
 }
 
 model Booking {
@@ -54,6 +137,7 @@ model Booking {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([roomId, status])
 }
 
 model SavedHotel {

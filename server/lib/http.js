@@ -15,6 +15,27 @@ export async function readJson(req) {
 
   const chunks = []
 
+  if (typeof req.on === 'function') {
+    const raw = await new Promise<string>((resolve, reject) => {
+      const parts = []
+      req.on('data', (chunk) => {
+        parts.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+      })
+      req.on('end', () => resolve(Buffer.concat(parts).toString('utf8')))
+      req.on('error', reject)
+    })
+
+    if (!raw.trim()) return {}
+
+    try {
+      return JSON.parse(raw)
+    } catch {
+      const error = new Error('Invalid JSON.')
+      error.status = 400
+      throw error
+    }
+  }
+
   for await (const chunk of req) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
   }

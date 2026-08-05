@@ -4,7 +4,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 import fs from 'node:fs'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { handleApiRequest } from './server/router.js'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -45,77 +45,14 @@ export default defineConfig({
         server.middlewares.use(async (req, res, next) => {
           loadDotEnv()
 
-          const method = req.method || 'GET'
-          const url = new URL(req.url || '/', 'http://localhost')
-          const pathname = url.pathname
-
+          const pathname = new URL(req.url || '/', 'http://localhost').pathname
           if (!pathname.startsWith('/api/')) return next()
 
-          const sendNotFound = () => {
-            res.statusCode = 404
-            res.end()
-          }
-
-          const match =
-            pathname === '/api/auth/signup'
-              ? { file: 'api/auth/signup.js', query: {} }
-              : pathname === '/api/auth/login'
-                ? { file: 'api/auth/login.js', query: {} }
-                : pathname === '/api/auth/logout'
-                  ? { file: 'api/auth/logout.js', query: {} }
-                  : pathname === '/api/auth/session'
-                    ? { file: 'api/auth/session.js', query: {} }
-                    : pathname === '/api/bookings'
-                      ? { file: 'api/bookings/index.js', query: {} }
-                      : pathname === '/api/saved'
-                        ? { file: 'api/saved/index.js', query: {} }
-                        : pathname === '/api/saved/toggle'
-                          ? { file: 'api/saved/toggle.js', query: {} }
-                          : (() => {
-                              const bookingCancel = pathname.match(/^\/api\/bookings\/([^/]+)\/cancel$/)
-                              if (bookingCancel) {
-                                return {
-                                  file: 'api/bookings/[bookingId]/cancel.js',
-                                  query: { bookingId: bookingCancel[1] },
-                                }
-                              }
-                              return null
-                            })()
-
-          if (!match) return next()
-
           try {
-            const handlerUrl = pathToFileURL(path.resolve(process.cwd(), match.file)).href
-            const mod = await import(handlerUrl)
-            const handler = mod?.default
-            if (typeof handler !== 'function') return sendNotFound()
-
-            const anyReq = req as any
-            anyReq.query = match.query
-            anyReq.method = method
-
-            const anyRes = res as any
-            anyRes.status = (code: number) => {
-              res.statusCode = code
-              return anyRes
-            }
-            anyRes.send = (body: unknown) => {
-              if (body === undefined) {
-                res.end()
-                return anyRes
-              }
-              if (typeof body === 'string' || body instanceof Buffer) {
-                res.end(body)
-                return anyRes
-              }
-              res.end(String(body))
-              return anyRes
-            }
-
-            await handler(anyReq, anyRes)
-          } catch {
-            res.statusCode = 500
-            res.end()
+            await handleApiRequest(req, res)
+          } catch (error) {
+            console.error(`[staybee-api] ${req.method || 'GET'} ${pathname} failed`, error)
+            next(error)
           }
         })
       },

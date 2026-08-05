@@ -1,27 +1,7 @@
-import { prisma } from '../../lib/db.js'
-import { getAuthenticatedUser } from '../../lib/auth.js'
-import { methodNotAllowed, sendError, sendException, sendJson } from '../../lib/http.js'
-
-function serializeBooking(booking) {
-  return {
-    id: booking.id,
-    hotelId: booking.hotelId,
-    roomId: booking.roomId,
-    dateRange: {
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
-    },
-    guests: booking.guests,
-    guestInfo: {
-      fullName: booking.guestFullName,
-      email: booking.guestEmail,
-      phone: booking.guestPhone,
-    },
-    totalPrice: booking.totalPrice,
-    status: booking.status === 'CANCELLED' ? 'cancelled' : 'confirmed',
-    createdAt: booking.createdAt.toISOString(),
-  }
-}
+import { prisma } from '../../../lib/db.js'
+import { getAuthenticatedUser } from '../../../lib/auth.js'
+import { loadBookingLookups, serializeBooking } from '../../../lib/bookings.js'
+import { methodNotAllowed, sendError, sendException, sendJson } from '../../../lib/http.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -51,7 +31,9 @@ export default async function handler(req, res) {
       data: { status: 'CANCELLED' },
     })
 
-    return sendJson(res, 200, { booking: serializeBooking(booking) })
+    const lookups = await loadBookingLookups([booking])
+
+    return sendJson(res, 200, { booking: serializeBooking(booking, lookups) })
   } catch (error) {
     console.error('booking cancel failed', error)
     return sendException(res, error, 'Unable to cancel this booking right now.')
