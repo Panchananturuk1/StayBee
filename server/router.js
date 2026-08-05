@@ -147,8 +147,32 @@ export function matchApiRoute(pathname) {
   return null
 }
 
+function applyCors(req, res) {
+  const origin = req.headers?.origin || req.headers?.Origin
+  const allowOrigin =
+    !origin ||
+    origin.includes('localhost') ||
+    origin.startsWith('capacitor://') ||
+    origin.startsWith('https://stay-bee-alpha.vercel.app') ||
+    origin.startsWith('http://localhost')
+
+  res.setHeader('Access-Control-Allow-Origin', allowOrigin && origin ? origin : '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.setHeader('Access-Control-Max-Age', '86400')
+  res.setHeader('Vary', 'Origin')
+}
+
 export async function handleApiRequest(req, res) {
+  applyCors(req, res)
+
   const method = req.method || 'GET'
+  if (method === 'OPTIONS') {
+    res.statusCode = 204
+    res.end()
+    return
+  }
+
   const url = resolveRequestUrl(req)
   const pathname = url.pathname
   req.url = `${url.pathname}${url.search}`
