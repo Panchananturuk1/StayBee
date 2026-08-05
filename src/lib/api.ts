@@ -1,4 +1,6 @@
-import { storageKeys } from '@/store/storage'
+import { getSessionToken, setSessionToken } from '@/lib/tokenStorage'
+
+export { getSessionToken, setSessionToken }
 
 export class ApiError extends Error {
   status: number
@@ -10,20 +12,12 @@ export class ApiError extends Error {
   }
 }
 
-export function getSessionToken() {
-  if (typeof window === 'undefined') return null
-  return window.localStorage.getItem(storageKeys.sessionToken)
-}
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
-export function setSessionToken(token: string | null) {
-  if (typeof window === 'undefined') return
-
-  if (token) {
-    window.localStorage.setItem(storageKeys.sessionToken, token)
-    return
-  }
-
-  window.localStorage.removeItem(storageKeys.sessionToken)
+export function resolveApiUrl(path: string) {
+  if (/^https?:\/\//i.test(path)) return path
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return API_BASE_URL ? `${API_BASE_URL}${normalizedPath}` : normalizedPath
 }
 
 type ApiFetchOptions = Omit<RequestInit, 'body'> & {
@@ -42,7 +36,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}) {
     headers.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(resolveApiUrl(path), {
     ...options,
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
