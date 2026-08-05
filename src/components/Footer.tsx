@@ -6,8 +6,11 @@ export default function Footer() {
           <span className="font-display tracking-tight text-white/80">StayBee</span>{' '}
           <span className="text-white/45">— hotel booking demo</span>
         </div>
-        <div className="text-white/45">
-          Built for Vercel deployment • No payments • Local data only
+        <div className="flex flex-col gap-2 text-white/45 md:items-end">
+          <a href="/privacy" className="hover:text-white/70 hover:underline underline-offset-4">
+            Privacy Policy
+          </a>
+          <span>Built for Vercel deployment • Demo booking app</span>
         </div>
       </div>
     </footer>
