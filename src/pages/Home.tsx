@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import SearchBar from '@/components/SearchBar'
@@ -8,6 +9,8 @@ import Button from '@/components/ui/Button'
 import { fetchHotels } from '@/services/hotels'
 import { useSearchStore } from '@/store/useSearchStore'
 import type { Hotel } from '@/types/stay'
+
+const isNativeApp = Capacitor.isNativePlatform()
 
 export default function Home() {
   const [featured, setFeatured] = useState<Hotel[]>([])
@@ -55,7 +58,7 @@ export default function Home() {
           </div>
 
           <div className="mt-7 grid gap-10 md:grid-cols-12 md:items-end">
-            <div className="md:col-span-7">
+            <div className={isNativeApp ? 'md:col-span-12' : 'md:col-span-7'}>
               <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white md:text-6xl">
                 Find a stay that feels like a secret.
               </h1>
@@ -77,28 +80,30 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="md:col-span-5">
-              <Card className="p-5">
-                <div className="text-xs font-medium tracking-wide text-white/60">This week</div>
-                <div className="mt-2 font-display text-2xl tracking-tight text-white">
-                  Honey-stamped picks
-                </div>
-                <div className="mt-4 space-y-3 text-sm text-white/60">
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Late-night city stays</div>
-                    <div className="text-white/85">4.6+</div>
+            {!isNativeApp ? (
+              <div className="md:col-span-5">
+                <Card className="p-5">
+                  <div className="text-xs font-medium tracking-wide text-white/60">This week</div>
+                  <div className="mt-2 font-display text-2xl tracking-tight text-white">
+                    Honey-stamped picks
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Weekend pricing</div>
-                    <div className="text-white/85">Fri–Sat +15%</div>
+                  <div className="mt-4 space-y-3 text-sm text-white/60">
+                    <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
+                      <div>Late-night city stays</div>
+                      <div className="text-white/85">4.6+</div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
+                      <div>Weekend pricing</div>
+                      <div className="text-white/85">Fri–Sat +15%</div>
+                    </div>
+                    <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
+                      <div>Live room inventory</div>
+                      <div className="text-white/85">Only X left</div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Live room inventory</div>
-                    <div className="text-white/85">Only X left</div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+                </Card>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-10">
