@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
+import { AVAILABILITY_PREVIEW_DAYS } from '@/constants/availability'
 import type { CalendarDay } from '@/types/stay'
 import { fetchRoomAvailability } from '@/services/hotels'
+import { addDaysToDateInput, todayDateInputValue } from '@/utils/format'
 
-export function useRoomAvailability(hotelId: string, roomId: string, month: string) {
+export function useRoomAvailability(hotelId: string, roomId: string) {
   const [days, setDays] = useState<CalendarDay[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!hotelId || !roomId || !month) {
+    if (!hotelId || !roomId) {
       setDays([])
       return
     }
@@ -17,10 +19,16 @@ export function useRoomAvailability(hotelId: string, roomId: string, month: stri
     setIsLoading(true)
     setError(null)
 
-    void fetchRoomAvailability(hotelId, roomId, month)
-      .then((data) => {
+    const today = todayDateInputValue()
+    const lastPreviewDay = addDaysToDateInput(today, AVAILABILITY_PREVIEW_DAYS - 1)
+    const months = [...new Set([today.slice(0, 7), lastPreviewDay.slice(0, 7)])]
+
+    void Promise.all(months.map((month) => fetchRoomAvailability(hotelId, roomId, month)))
+      .then((results) => {
         if (cancelled) return
-        setDays(data.days)
+        const merged = results.flatMap((result) => result.days)
+        const uniqueDays = [...new Map(merged.map((day) => [day.date, day])).values()]
+        setDays(uniqueDays)
       })
       .catch(() => {
         if (cancelled) return
@@ -34,7 +42,7 @@ export function useRoomAvailability(hotelId: string, roomId: string, month: stri
     return () => {
       cancelled = true
     }
-  }, [hotelId, month, roomId])
+  }, [hotelId, roomId])
 
   return { days, isLoading, error }
 }

@@ -90,11 +90,9 @@ export default function HotelDetails() {
     }
   }, [checkIn, checkOut, hotelId])
 
-  const calendarMonth = checkIn ? checkIn.slice(0, 7) : today.slice(0, 7)
   const { days, isLoading: calendarLoading } = useRoomAvailability(
     hotel?.id || '',
     selectedRoomId,
-    calendarMonth,
   )
 
   if (isLoading) {
@@ -276,7 +274,7 @@ export default function HotelDetails() {
                 }}
               />
               {selectedRoomId === room.id ? (
-                <AvailabilityCalendar days={days} month={calendarMonth} isLoading={calendarLoading} />
+                <AvailabilityCalendar days={days} isLoading={calendarLoading} />
               ) : (
                 <div className="flex justify-end">
                   <Button variant="secondary" onClick={() => setSelectedRoomId(room.id)}>

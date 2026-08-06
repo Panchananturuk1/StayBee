@@ -29,4 +29,16 @@ dist-ssr
 
 android/local.properties
 android/.gradle
+android/keystore.properties
+android/*.keystore
+*.keystore
+*.aab
+PLAYSTORE_SIGNING.txt
 android_new
+
+# Local temp / inspection folders
+_apk_check/
+
+# Play Store assets (generated locally — upload manually to Play Console)
+playstore-assets/
+.vercel

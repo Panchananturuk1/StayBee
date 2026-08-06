@@ -1,0 +1,1 @@
+export const AVAILABILITY_PREVIEW_DAYS = 6
