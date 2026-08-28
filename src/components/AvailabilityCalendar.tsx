@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
-import type { CalendarDay } from '@/types/stay'
 import { AVAILABILITY_PREVIEW_DAYS } from '@/constants/availability'
+import type { CalendarDay } from '@/types/stay'
 import { formatCurrency } from '@/utils/format'
 
 function statusClasses(status: CalendarDay['status']) {

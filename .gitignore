@@ -33,6 +33,7 @@ android_new
 
 # Play Store signing material and build artifacts — never commit these
 android/keystore.properties
+android/*.keystore
 *.keystore
 *.jks
 *.aab

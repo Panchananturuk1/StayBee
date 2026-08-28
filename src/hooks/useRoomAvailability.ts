@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
+import { AVAILABILITY_PREVIEW_DAYS } from '@/constants/availability'
 import type { CalendarDay } from '@/types/stay'
 import { fetchRoomAvailability } from '@/services/hotels'
-import { AVAILABILITY_PREVIEW_DAYS } from '@/constants/availability'
 import { addDaysToDateInput } from '@/utils/format'
 
 export function previewDates(startDate: string) {
