@@ -12,6 +12,14 @@ A hotel discovery + booking app built with React + Vite + Tailwind, backed by Ne
 ## Live Demo
 https://stay-bee-alpha.vercel.app/
 
+## Screenshots
+
+Home screen on web and Android:
+
+![StayBee home on the web](docs/screenshots/home-web.png)
+
+![StayBee home on Android](docs/screenshots/home-android.png)
+
 ## Local Development
 ```bash
 npm install

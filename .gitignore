@@ -29,16 +29,17 @@ dist-ssr
 
 android/local.properties
 android/.gradle
+android_new
+
+# Play Store signing material and build artifacts — never commit these
 android/keystore.properties
 android/*.keystore
 *.keystore
+*.jks
 *.aab
 PLAYSTORE_SIGNING.txt
-android_new
 
-# Local temp / inspection folders
-_apk_check/
-
-# Play Store assets (generated locally — upload manually to Play Console)
+# Generated listing assets and temporary APK inspection output
 playstore-assets/
-.vercel
+_apk_check/
+.vercel/

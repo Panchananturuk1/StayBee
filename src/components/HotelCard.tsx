@@ -20,7 +20,7 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
 
   return (
     <Card className="group overflow-hidden">
-      <div className="relative">
+      <div className="on-media relative">
         <Link to={`/hotels/${hotel.id}`} className="block">
           <StaybeeImage
             src={hotel.images[0]}
@@ -32,7 +32,9 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
         </Link>
 
         <div className="absolute left-4 top-4 flex items-center gap-2">
-          <Badge tone="neutral">{hotel.propertyType}</Badge>
+          <Badge tone="neutral" className="bg-ink/60 backdrop-blur-md">
+            {hotel.propertyType}
+          </Badge>
           {hotel.amenities.includes('breakfast') ? <Badge tone="honey">breakfast</Badge> : null}
         </div>
 

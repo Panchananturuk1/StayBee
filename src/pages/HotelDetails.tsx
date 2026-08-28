@@ -90,9 +90,11 @@ export default function HotelDetails() {
     }
   }, [checkIn, checkOut, hotelId])
 
+  const availabilityStart = checkIn || today
   const { days, isLoading: calendarLoading } = useRoomAvailability(
     hotel?.id || '',
     selectedRoomId,
+    availabilityStart,
   )
 
   if (isLoading) {
@@ -169,7 +171,6 @@ export default function HotelDetails() {
                   }
                   setBasics(updates)
                 }}
-                className="[color-scheme:dark]"
               />
               <Input
                 label="Check out"
@@ -177,7 +178,6 @@ export default function HotelDetails() {
                 min={minCheckOut}
                 value={checkOut}
                 onChange={(e) => setBasics({ checkOut: e.target.value })}
-                className="[color-scheme:dark]"
               />
               <div>
                 <div className="mb-2 text-xs font-medium tracking-wide text-white/70">Guests</div>

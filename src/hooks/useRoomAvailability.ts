@@ -2,33 +2,43 @@ import { useEffect, useState } from 'react'
 import { AVAILABILITY_PREVIEW_DAYS } from '@/constants/availability'
 import type { CalendarDay } from '@/types/stay'
 import { fetchRoomAvailability } from '@/services/hotels'
-import { addDaysToDateInput, todayDateInputValue } from '@/utils/format'
+import { addDaysToDateInput } from '@/utils/format'
 
-export function useRoomAvailability(hotelId: string, roomId: string) {
+export function previewDates(startDate: string) {
+  if (!startDate) return []
+  return Array.from({ length: AVAILABILITY_PREVIEW_DAYS }, (_, offset) =>
+    addDaysToDateInput(startDate, offset),
+  )
+}
+
+export function useRoomAvailability(hotelId: string, roomId: string, startDate: string) {
   const [days, setDays] = useState<CalendarDay[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!hotelId || !roomId) {
+    if (!hotelId || !roomId || !startDate) {
       setDays([])
       return
     }
+
+    const wanted = previewDates(startDate)
+    // The preview window can straddle a month boundary, so fetch each month it touches.
+    const months = [...new Set(wanted.map((date) => date.slice(0, 7)))]
 
     let cancelled = false
     setIsLoading(true)
     setError(null)
 
-    const today = todayDateInputValue()
-    const lastPreviewDay = addDaysToDateInput(today, AVAILABILITY_PREVIEW_DAYS - 1)
-    const months = [...new Set([today.slice(0, 7), lastPreviewDay.slice(0, 7)])]
-
     void Promise.all(months.map((month) => fetchRoomAvailability(hotelId, roomId, month)))
-      .then((results) => {
+      .then((responses) => {
         if (cancelled) return
-        const merged = results.flatMap((result) => result.days)
-        const uniqueDays = [...new Map(merged.map((day) => [day.date, day])).values()]
-        setDays(uniqueDays)
+        const wantedSet = new Set(wanted)
+        const merged = responses
+          .flatMap((response) => response.days)
+          .filter((day) => wantedSet.has(day.date))
+          .sort((a, b) => a.date.localeCompare(b.date))
+        setDays(merged)
       })
       .catch(() => {
         if (cancelled) return
@@ -42,7 +52,7 @@ export function useRoomAvailability(hotelId: string, roomId: string) {
     return () => {
       cancelled = true
     }
-  }, [hotelId, roomId])
+  }, [hotelId, roomId, startDate])
 
   return { days, isLoading, error }
 }
