@@ -1,19 +1,56 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 import SearchBar from '@/components/SearchBar'
 import HotelCard from '@/components/HotelCard'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { fetchHotels } from '@/services/hotels'
 import { useSearchStore } from '@/store/useSearchStore'
+import { formatCompactDate } from '@/utils/format'
+import { tonightRange, upcomingWeekendRange } from '@/utils/datePresets'
 import type { Hotel } from '@/types/stay'
 
+const isNativeApp = Capacitor.isNativePlatform()
+
 export default function Home() {
+  const navigate = useNavigate()
   const [featured, setFeatured] = useState<Hotel[]>([])
   const [koraputHotels, setKoraputHotels] = useState<Hotel[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const setBasics = useSearchStore((s) => s.setBasics)
+  const setFilters = useSearchStore((s) => s.setFilters)
+  const setSort = useSearchStore((s) => s.setSort)
+
+  const weekend = upcomingWeekendRange()
+
+  const picks = [
+    {
+      label: 'Top-rated stays',
+      value: '4.6+',
+      apply: () => {
+        setFilters({ minRating: 4.5 })
+        setSort('rating')
+      },
+    },
+    {
+      label: 'Weekend escape',
+      value: `${formatCompactDate(weekend.checkIn)} – ${formatCompactDate(weekend.checkOut)}`,
+      apply: () => {
+        setBasics(weekend)
+        setSort('best')
+      },
+    },
+    {
+      label: 'Available tonight',
+      value: 'Book today',
+      apply: () => {
+        setBasics(tonightRange())
+        setSort('priceLow')
+      },
+    },
+  ]
 
   useEffect(() => {
     let cancelled = false
@@ -55,7 +92,7 @@ export default function Home() {
           </div>
 
           <div className="mt-7 grid gap-10 md:grid-cols-12 md:items-end">
-            <div className="md:col-span-7">
+            <div className={isNativeApp ? 'md:col-span-12' : 'md:col-span-7'}>
               <h1 className="font-display text-4xl leading-[1.05] tracking-tight text-white md:text-6xl">
                 Find a stay that feels like a secret.
               </h1>
@@ -77,28 +114,36 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="md:col-span-5">
-              <Card className="p-5">
-                <div className="text-xs font-medium tracking-wide text-white/60">This week</div>
-                <div className="mt-2 font-display text-2xl tracking-tight text-white">
-                  Honey-stamped picks
-                </div>
-                <div className="mt-4 space-y-3 text-sm text-white/60">
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Late-night city stays</div>
-                    <div className="text-white/85">4.6+</div>
+            {isNativeApp ? null : (
+              <div className="md:col-span-5">
+                <Card className="p-5">
+                  <div className="text-xs font-medium tracking-wide text-white/60">This week</div>
+                  <div className="mt-2 font-display text-2xl tracking-tight text-white">
+                    Honey-stamped picks
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Weekend pricing</div>
-                    <div className="text-white/85">Fri–Sat +15%</div>
+                  <div className="mt-1 text-xs text-white/45">Tap a pick to apply it to your search.</div>
+                  <div className="mt-4 space-y-3 text-sm text-white/60">
+                    {picks.map((pick) => (
+                      <button
+                        key={pick.label}
+                        type="button"
+                        onClick={() => {
+                          pick.apply()
+                          navigate('/search')
+                        }}
+                        className="flex w-full items-center justify-between gap-3 rounded-2xl bg-white/4 px-4 py-3 text-left ring-1 ring-white/10 transition hover:bg-white/8 hover:ring-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-honey/50"
+                      >
+                        <span>{pick.label}</span>
+                        <span className="inline-flex items-center gap-1 text-white/85">
+                          {pick.value}
+                          <ChevronRight className="h-4 w-4 text-white/45" />
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <div className="flex items-center justify-between rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/10">
-                    <div>Live room inventory</div>
-                    <div className="text-white/85">Only X left</div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+                </Card>
+              </div>
+            )}
           </div>
 
           <div className="mt-10">

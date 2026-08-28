@@ -68,7 +68,7 @@ export default function ProfileMenu({
       </Button>
 
       {open ? (
-        <Card className="absolute right-0 mt-2 w-[260px] p-3">
+        <Card className="absolute right-0 z-50 mt-2 w-[260px] border border-white/15 bg-ink p-3 shadow-menu backdrop-blur-none">
           <div className="px-2 py-2">
             <div className="truncate font-display text-lg tracking-tight text-white">{user.fullName}</div>
             <div className="truncate text-sm text-white/60">{user.email}</div>

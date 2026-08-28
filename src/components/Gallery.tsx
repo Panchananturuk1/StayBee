@@ -22,9 +22,9 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
         ) : (
           <div className="h-[360px] w-full bg-white/5 md:h-[420px]" />
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
+        <div className="on-media pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
         {list.length > 1 ? (
-          <div className="absolute bottom-4 right-4 flex items-center gap-2">
+          <div className="on-media absolute bottom-4 right-4 flex items-center gap-2">
             <Button
               variant="secondary"
               className="h-10 w-10 rounded-full p-0"
